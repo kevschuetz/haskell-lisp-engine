@@ -19,7 +19,7 @@ y
 (* y 2)
 (/ 5 2)
 (% 5 2)
-(< 5 2)
+(+ 1 2)
 (> 5 2)
 (<= 5 5)
 (>= 5 5)
@@ -38,7 +38,7 @@ y
 
 
 (cons 3 nil)
-(cons 2 (cons 3 nil))
+(cons 3 nil)
 (cons 1(cons 2 (cons 3 nil)))
 (cons 1 (quote (2 3)))
 (car (quote (1 2 3)))
@@ -51,6 +51,8 @@ y
 (cdr (cdr (cdr (cons 1(cons 2 (cons 3 nil))))))
 (car nil)  -- error
 (cdr nil)  -- error
+
+(if false (quote (1 2 3)) (quote (4 5 6)))
 
 (define l (quote (2 7 8 2 1 9 4)))
 

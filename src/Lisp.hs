@@ -107,7 +107,7 @@ eval bds e@(P (S op) (P left (P right Nil)))  | elem op ["+", "-", "*", "/", "%"
 -- eval minus unary function applications (e.g., (- 3) )
   -- TODO
 eval bds e@(P (S "-") (P right Nil)) =
-  trace ("++ Evaluating unary arithmetic" ++ (show e))(
+  trace ("++ Evaluating unary arithmetic " ++ (show e))(
     let 
       argument = eval bds right
     in
@@ -121,7 +121,7 @@ eval bds e@(P (S "-") (P right Nil)) =
 -- eval equality function applications (operators "==" and "!=")
   -- TODO
 eval bds e@(P (S op) (P left (P right Nil))) | elem op["==", "!="] =
-  trace ("++ Evaluating equality function application" ++ (show e))(
+  trace ("++ Evaluating equality function application " ++ (show e))(
     let
       lr = eval bds left
       rr = eval bds right
@@ -138,7 +138,7 @@ eval bds e@(P (S op) (P left (P right Nil))) | elem op["==", "!="] =
 -- eval relational function applications (operators "<", ">", "<=", and ">=")
   -- TODO
 eval bds e@(P (S op) (P left (P right Nil))) | elem op["<", ">", "<=", ">="] =
-  trace ("++ Evaluating relational function application" ++ (show e))(
+  trace ("++ Evaluating relational function application " ++ (show e))(
     let
       lr = eval bds left
       rr = eval bds right
@@ -157,7 +157,7 @@ eval bds e@(P (S op) (P left (P right Nil))) | elem op["<", ">", "<=", ">="] =
 -- eval Boolean binary function applications (operators "&&" and "||")
   -- TODO
 eval bds e@(P (S op) (P left (P right Nil))) | elem op["&&", "||"] =
-  trace ("++ Evaluating binary function application" ++ (show e))(
+  trace ("++ Evaluating binary function application " ++ (show e))(
     let
       lr = eval bds left
       rr = eval bds right
@@ -174,7 +174,7 @@ eval bds e@(P (S op) (P left (P right Nil))) | elem op["&&", "||"] =
 -- eval Boolean unary Boolean not function application (e.g., (! true))
   -- TODO
 eval bds e@(P (S "!") (P right Nil)) =
-  trace ("++ Evaluating unary Boolean not function" ++ (show e))(
+  trace ("++ Evaluating unary Boolean not function " ++ (show e))(
     let 
       argument = eval bds right
     in
@@ -186,7 +186,7 @@ eval bds e@(P (S "!") (P right Nil)) =
 -- eval built in function application cons (e.g., (cons 1 nil) )
   -- TODO
 eval bds e@(P (S "cons") (P left (P right Nil))) =
-  trace ("++ Evaluating built in function application cons" ++ (show e))(
+  trace ("++ Evaluating built in function application cons " ++ (show e))(
     let
       lr = eval bds left
       rr = eval bds right
@@ -202,7 +202,7 @@ eval bds e@(P (S "cons") (P left (P right Nil))) =
 -- eval built in function application car (e.g., (car (cons 1 nil)) )
   -- TODO
 eval bds e@(P (S "car") (P left right)) =
-  trace ("++ Evaluating built in function application car" ++ (show e))(
+  trace ("++ Evaluating built in function application car " ++ (show e))(
     let
       lr = eval bds left
       rr = eval bds right
@@ -216,7 +216,7 @@ eval bds e@(P (S "car") (P left right)) =
 -- eval built in function application cdr (e.g., (cdr (cons 1 nil)) )
   -- TODO
 eval bds e@(P (S "cdr") (P left right)) =
-  trace ("++ Evaluating built in function application cdr" ++ (show e))(
+  trace ("++ Evaluating built in function application cdr " ++ (show e))(
     let
       lr = eval bds left
       rr = eval bds right
@@ -229,9 +229,25 @@ eval bds e@(P (S "cdr") (P left right)) =
 
 -- eval quote special form
   -- TODO
+eval bds e@(P (S "quote") arg) =
+  trace ("++ Evaluating quote special form " ++ (show e))(
+    case (arg) of
+      (P l r) -> Just l
+      (_) -> Nothing
+  )
 
 -- eval if special form
   -- TODO
+eval bds e@(P (S "if") (P cond (P eThen (P eElse Nil)))) =
+  trace ("++ Evaluating if special form " ++ (show cond) ++ " | " ++ (show eThen) ++ " | " ++ (show eElse))(
+    let
+      condEval = eval bds cond
+    in
+      case (condEval) of
+        (Just (B b)) -> if b then eval bds eThen else eval bds eElse
+        (_) -> Nothing
+  )
+
 
 -- eval of binary operator with other than two arguments fails
 eval bds e@(P (S op) _) | elem op ["+", "-", "*", "/", "%", "<", ">", "<=", ">=", "&&", "||", "==", "!=", "cons"]  =
@@ -245,6 +261,16 @@ eval bds e@(P (S op) _) | elem op ["-", "!", "car", "cdr", "quote"]  =
 
 -- eval function applications
   -- TODO
+eval bds e@(P func a) =
+  trace ("++ Evaluating function application " ++ (show func) ++ " | " ++ (show a) ++ " | ")(
+      let
+        fl = eval bds func
+      in
+        case (fl) of
+          (Just (F args body)) -> trace ((show fl) ++ " | " ++ (show args) ++ " | " ++ (show body)) (
+            Just Nil) -- bind evaluation of actual arguments to formal parameters, call function body
+          (_) -> Nothing
+  )
 
 -- evaluating any other operation is invalid
 eval bds e                      =
