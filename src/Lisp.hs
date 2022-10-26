@@ -106,27 +106,126 @@ eval bds e@(P (S op) (P left (P right Nil)))  | elem op ["+", "-", "*", "/", "%"
 
 -- eval minus unary function applications (e.g., (- 3) )
   -- TODO
+eval bds e@(P (S "-") (P right Nil)) =
+  trace ("++ Evaluating unary arithmetic" ++ (show e))(
+    let 
+      argument = eval bds right
+    in
+      case (argument) of
+        (Just (I a)) ->
+          Just (I (0 - a))
+        (_)                     -> Nothing
+  )
+
 
 -- eval equality function applications (operators "==" and "!=")
   -- TODO
+eval bds e@(P (S op) (P left (P right Nil))) | elem op["==", "!="] =
+  trace ("++ Evaluating equality function application" ++ (show e))(
+    let
+      lr = eval bds left
+      rr = eval bds right
+    in
+      case (lr, rr) of
+        (Just (I li), Just (I ri)) ->
+          case op of
+            "==" -> Just (B (li == ri))
+            "!=" -> Just (B (li /= ri))
+            _   -> Nothing -- will not happen
+        (_, _)                     -> Nothing
+  )
 
 -- eval relational function applications (operators "<", ">", "<=", and ">=")
   -- TODO
+eval bds e@(P (S op) (P left (P right Nil))) | elem op["<", ">", "<=", ">="] =
+  trace ("++ Evaluating relational function application" ++ (show e))(
+    let
+      lr = eval bds left
+      rr = eval bds right
+    in
+      case (lr, rr) of
+        (Just (I li), Just (I ri)) ->
+          case op of
+            "<" -> Just (B (li < ri))
+            ">" -> Just (B (li > ri))
+            "<=" -> Just (B (li <= ri))
+            ">=" -> Just (B (li >= ri))
+            _   -> Nothing -- will not happen
+        (_, _)                     -> Nothing
+  )
 
 -- eval Boolean binary function applications (operators "&&" and "||")
   -- TODO
+eval bds e@(P (S op) (P left (P right Nil))) | elem op["&&", "||"] =
+  trace ("++ Evaluating binary function application" ++ (show e))(
+    let
+      lr = eval bds left
+      rr = eval bds right
+    in
+      case (lr, rr) of
+        (Just (B lb), Just (B rb)) ->
+          case op of
+            "&&" -> Just (B (lb && rb))
+            "||" -> Just (B (lb || rb))
+            _   -> Nothing -- will not happen
+        (_, _)                     -> Nothing
+  )
 
 -- eval Boolean unary Boolean not function application (e.g., (! true))
   -- TODO
+eval bds e@(P (S "!") (P right Nil)) =
+  trace ("++ Evaluating unary Boolean not function" ++ (show e))(
+    let 
+      argument = eval bds right
+    in
+      case (argument) of
+        (Just (B b)) -> Just (B (not b))
+        (_) -> Nothing
+  )
 
 -- eval built in function application cons (e.g., (cons 1 nil) )
   -- TODO
+eval bds e@(P (S "cons") (P left (P right Nil))) =
+  trace ("++ Evaluating built in function application cons" ++ (show e))(
+    let
+      lr = eval bds left
+      rr = eval bds right
+    in
+      case (lr, rr) of
+        (Just (I li), Just Nil) -> Just (P (I li) Nil)
+        (Just (I li), Just (I ri)) -> Just (P (I li) (I ri))
+        (Just (I li), Just (P l r)) -> Just (P (I li) (P l r))
+        (_, _)                     -> Nothing 
+  )
+
 
 -- eval built in function application car (e.g., (car (cons 1 nil)) )
   -- TODO
+eval bds e@(P (S "car") (P left right)) =
+  trace ("++ Evaluating built in function application car" ++ (show e))(
+    let
+      lr = eval bds left
+      rr = eval bds right
+    in
+      case (lr, rr) of
+        (Just (P l r), _) -> Just l
+        (Just (I i), _) -> Just (I i)
+        (_, _)                     -> Nothing
+  )
 
 -- eval built in function application cdr (e.g., (cdr (cons 1 nil)) )
   -- TODO
+eval bds e@(P (S "cdr") (P left right)) =
+  trace ("++ Evaluating built in function application cdr" ++ (show e))(
+    let
+      lr = eval bds left
+      rr = eval bds right
+    in
+      case (lr, rr) of
+        (Just (P l r), _) -> Just r
+        (_, _)                     -> Nothing
+  )
+
 
 -- eval quote special form
   -- TODO
