@@ -268,7 +268,9 @@ eval bds e@(P func a) =
       in
         case (fl) of
           (Just (F args body)) -> trace ((show fl) ++ " | " ++ (show args) ++ " | " ++ (show body)) (
-            Just Nil) -- bind evaluation of actual arguments to formal parameters, call function body
+            case (extendBds bds args a) of
+              Just newBindings -> eval newBindings body
+              (_) -> Nothing) -- bind evaluation of actual arguments to formal parameters, call function body
           (_) -> Nothing
   )
 
